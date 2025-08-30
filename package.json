@@ -1,0 +1,19 @@
+{
+  "name": "demo-express-hbs",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch --env-file=.env src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@formkit/tempo": "0.1.2",
+    "express": "5.1.0",
+    "express-handlebars": "8.0.2"
+  }
+}

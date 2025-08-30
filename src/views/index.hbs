@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invoice</title>
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+      box-sizing: border-box
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif
+    }
+
+    .wave-top {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 12rem;
+      background: linear-gradient(to right, #F69474, #ED2762);
+      clip-path: ellipse(65% 100% at 0% 0%);
+    }
+
+    main {
+      position: relative;
+      padding: 2rem 4rem;
+
+      header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 4rem;
+
+        .hero {
+          h1 {
+            font-size: 3rem;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+            color: #FFFFFF;
+          }
+          h2 {
+            font-weight: 400;
+            font-size: 1rem;
+        
+            span {
+              font-weight: 600;
+              text-transform: uppercase;
+            }
+          }
+        }
+
+        .company {
+          span {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            display: block;
+          }
+
+          ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+
+            li {
+              font-size: 0.75rem
+            }
+          }
+        }
+      }
+
+      .overview {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 2rem;
+
+        .box {
+          background: rgba(0, 0, 0, 0.1);
+          width: 100%;
+          height: 150px;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+
+          h4 {
+            font-size: 1rem;
+          }
+
+          span {
+            font-size: 0.75rem;
+          }
+        }
+      }
+
+      table {
+        border-spacing: 0;
+        width: 100%;
+
+        thead {
+          background: linear-gradient(to right, #EE2762, #F89675);
+      
+          tr {
+            th {
+              padding: 1rem 2rem;
+              text-transform: uppercase;
+              color: #FFFFFF;
+              text-align: left;
+
+              &:first-child {
+                border-top-left-radius: 999px;
+                border-bottom-left-radius: 999px;
+              }
+
+              &:last-child {
+                border-top-right-radius: 999px;
+                border-bottom-right-radius: 999px;
+              }
+            }
+          }
+        }
+
+        tbody {
+          tr {
+            td {
+              padding: 1rem 2rem;
+              font-weight: 600;
+            }
+          }
+        }
+      }
+
+      hr {
+        margin: 1rem 0;
+      }
+
+      .summary {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 1rem;
+  
+        .row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          width: 40%;
+          min-width: 2rem;
+
+          h3 {
+            text-align: right;
+            min-width: 10rem;
+            width: 50%;
+            font-weight: 600;
+          }
+
+          span {
+            font-weight: 600;
+
+            &.fill {
+              background: linear-gradient(to right, #EE2762, #F89675);
+              padding: 0.5rem;
+              color: #FFFFFF;
+            }
+          }
+        }
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wave-top"></div>
+  <main>
+    <header>
+      <div class="hero">
+        <h1>Invoice</h1>
+        <h2>Invoice to: <span>{{customer_name}}</span></h2>
+      </div>
+
+      <div class="company">
+        <span>LOGO</span>
+        <ul>
+          <li>Address: Your Street No, 223 NY USA</li>
+          <li>Phone: <a href="tel:+1234567890">+123 456 7890</a></li>
+          <li>Email: <a href="mailto:your@email.com">your@email.com</a></li>
+          <li>Website: <a href="https://example.com">example.com</a></li>
+        </ul>
+      </div>
+    </header>
+
+    <div class="overview">
+      <div class="box">
+        <h4>Date</h4>
+        <span>{{created_at}}</span>
+      </div>
+      <div class="box">
+        <h4>Service NO.</h4>
+        <span>{{service_no}}</span>
+      </div>
+      <div class="box">
+        <h4>Account NO.</h4>
+        <span>{{account_no}}</span>
+      </div>
+      <div class="box">
+        <h4>Amount</h4>
+        <span>${{sum total_amount (calculateTax total_amount)}}</span>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Item Description</th>
+          <th>Price</th>
+          <th>QTY</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each items}}
+          <tr>
+            <td>{{name}}</td>
+            <td>${{unit_price}}</td>
+            <td>{{quantity}}</td>
+            <td>${{multiply unit_price quantity}}</td>
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+
+    <hr />
+
+    <div class="summary">
+      <div class="row">
+        <h3>Subtotal</h3>
+        <span>${{total_amount}}</span>
+      </div>
+      <div class="row">
+        <h3>VAT/TAX {{tax}}%</h3>
+        <span>${{calculateTax total_amount}}</span>
+      </div>
+      <div class="row">
+        <h3>Total Due</h3>
+        <span class="fill">${{sum total_amount (calculateTax total_amount)}}</span>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
