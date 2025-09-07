@@ -207,7 +207,7 @@
       </div>
       <div class="box">
         <h4>Amount</h4>
-        <span>${{sum total_amount (calculateTax total_amount)}}</span>
+        <span>${{sum total_amount (calculateTax tax total_amount)}}</span>
       </div>
     </div>
 
@@ -241,11 +241,11 @@
       </div>
       <div class="row">
         <h3>VAT/TAX {{tax}}%</h3>
-        <span>${{calculateTax total_amount}}</span>
+        <span>${{calculateTax tax total_amount}}</span>
       </div>
       <div class="row">
         <h3>Total Due</h3>
-        <span class="fill">${{sum total_amount (calculateTax total_amount)}}</span>
+        <span class="fill">${{sum total_amount (calculateTax tax total_amount)}}</span>
       </div>
     </div>
   </main>

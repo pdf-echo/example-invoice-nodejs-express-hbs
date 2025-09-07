@@ -4,15 +4,14 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "node --watch --env-file=.env src/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node --env-file=.env src/index.js",
+    "dev": "node --watch --env-file=.env src/index.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@formkit/tempo": "0.1.2",
     "express": "5.1.0",
     "express-handlebars": "8.0.2"
   }

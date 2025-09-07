@@ -1,10 +1,6 @@
 import express from 'express'
 import { engine } from 'express-handlebars'
-import { format } from '@formkit/tempo'
 import path from 'node:path'
-import { fetchPdfEcho } from './services/pdfecho.js'
-import { TAX } from './config/consts.js'
-import { invoices } from './exampleData.js'
 
 const app = express()
 
@@ -13,63 +9,88 @@ app.engine('hbs', engine({
   helpers: {
     sum: (a, b) => a + b,
     multiply: (a, b) => a * b,
-    calculateTax: (value) => Math.round(value * (TAX / 100))
+    calculateTax: (tax, totalAmount) => Math.round(totalAmount * (tax / 100))
   }
 }))
 app.set('view engine', 'hbs')
 app.set('views', path.join('src', 'views'))
 
-app.use((req, res, next) => {
-  res.getRenderHTML = (view, options) => new Promise((resolve, reject) => {
-    res.render(view, options, (error, html) => {
-      if (error) {
-        return reject(error)
-      }
+app.get('/invoice', (req, res) => {
+  const MOCKUP_DATA = {
+    id: 'inv_cmeyqpbks000008iccyi9fd20',
+    customer_name: 'Joe Doe',
+    account_no: 'CUST-12312332',
+    service_no: 'SRV-123123213',
+    items: [
+      { name: 'Graphic Design', unit_price: 125, quantity: 2 },
+      { name: 'Web Design', unit_price: 150, quantity: 1 },
+      { name: 'Branding Design', unit_price: 50, quantity: 1 },
+      { name: 'Brochure Design', unit_price: 50, quantity: 1 }
+    ],
+    created_at: '30-08-2025',
+    tax: 7.5
+  }
 
-      return resolve(html)
-    })
+  const totalAmount = MOCKUP_DATA.items.reduce((acc, value) => acc + value.unit_price * value.quantity, 0)
+
+  res.render('invoice', {
+    ...MOCKUP_DATA,
+    total_amount: totalAmount
   })
-
-  next()
 })
 
-app.get('/invoices/:id/pdf', async (req, res) => {
-  const invoice = invoices.find(({ id }) => id === req.params.id)
-
-  if (invoice === undefined) {
-    res.status(404).json({ error: { code: 'invoice_not_found', type: 'invalid_request_error' } })
+app.get('/invoice/pdf', async (req, res) => {
+  const MOCKUP_DATA = {
+    id: 'inv_cmeyqpbks000008iccyi9fd20',
+    customer_name: 'Joe Doe',
+    account_no: 'CUST-12312332',
+    service_no: 'SRV-123123213',
+    items: [
+      { name: 'Graphic Design', unit_price: 125, quantity: 2 },
+      { name: 'Web Design', unit_price: 150, quantity: 1 },
+      { name: 'Branding Design', unit_price: 50, quantity: 1 },
+      { name: 'Brochure Design', unit_price: 50, quantity: 1 }
+    ],
+    created_at: '30-08-2025',
+    tax: 7.5
   }
 
-  const totalAmount = invoice.items.reduce((acc, value) => acc + value.unit_price * value.quantity, 0)
+  const totalAmount = MOCKUP_DATA.items.reduce((acc, value) => acc + value.unit_price * value.quantity, 0)
 
-  try {
-    const html = await res.getRenderHTML('index', {
-      ...invoice,
-      tax: TAX,
-      total_amount: totalAmount,
-      created_at: format({ date: invoice.created_at, tz: 'America/New_York', format: 'DD-MM-YYYY' })
-    })
-
-    const request = await fetchPdfEcho('/v1/pdf', {
-      method: 'POST',
-      body: JSON.stringify({
-        source: html,
-        filename: `${invoice.id}.pdf`
-      }),
-      headers: {
-        'Content-Type': 'application/json'
+  res.render(
+    'invoice',
+    {
+      ...MOCKUP_DATA,
+      total_amount: totalAmount
+    },
+    async (error, html) => {
+      if (error !== undefined) {
+        res.status(400).json({ error: { type: 'invalid_request_error', code: 'invalid_html' } })
+        return
       }
-    })
 
-    const data = await request.arrayBuffer()
+      try {
+        const request = await fetch('https://api.pdfecho.com/v1/pdf', {
+          method: 'POST',
+          body: JSON.stringify({ source: html }),
+          headers: {
+            Authorization: `Basic ${Buffer.from('sk_live_83d7861341d5964a8182f808526fec75cd131703:').toString('base64')}`,
+            'pe-test-mode': 'true',
+            'Content-Type': 'application/json'
+          }
+        })
 
-    res
-      .contentType('application/pdf')
-      .send(Buffer.from(data))
-  } catch (error) {
-    console.log(error)
-    res.status(500).json({ error: { code: 'server_internal_error', type: 'api_error' } })
-  }
+        const data = await request.arrayBuffer()
+
+        res
+          .contentType('application/pdf')
+          .send(Buffer.from(data))
+      } catch (error) {
+        console.log(error)
+        res.status(500).json({ error: { type: 'api_error', code: 'server_internal_error' } })
+      }
+    }
+  )
 })
 
 export { app }
