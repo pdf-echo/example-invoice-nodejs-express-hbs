@@ -74,7 +74,7 @@ app.get('/invoice/pdf', async (req, res) => {
           method: 'POST',
           body: JSON.stringify({ source: html }),
           headers: {
-            Authorization: `Basic ${Buffer.from('sk_live_83d7861341d5964a8182f808526fec75cd131703:').toString('base64')}`,
+            Authorization: `Basic ${Buffer.from('YOUR_API_KEY:').toString('base64')}`,
             'pe-test-mode': 'true',
             'Content-Type': 'application/json'
           }
